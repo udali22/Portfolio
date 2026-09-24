@@ -1,12 +1,12 @@
 # ========================================================
 # Stage 1: Build the Vite React Application
-# Uses Alpine Node to keep builder layer lightweight
+# Uses Alpine Node; npm ci for reproducible installs
 # ========================================================
 FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Install dependencies first for Docker layer caching
+# Install dependencies first to exploit Docker layer caching
 COPY package.json package-lock.json* ./
 RUN npm ci
 
@@ -17,26 +17,40 @@ COPY . .
 RUN npm run build
 
 # ========================================================
-# Stage 2: Serve static assets with ultra-lightweight Nginx
-# Final image size is ~25MB with minimal RAM usage (~5-10MB)
+# Stage 2: Serve the production build with 'serve'
+# - No Nginx inside this container.
+# - 'serve' handles SPA routing (--single / -s flag).
+# - Runs on port 3000 as the non-root 'node' user.
+# - Image size: ~175 MB (Node.js runtime is larger than
+#   nginx:alpine but this removes the duplicate Nginx layer).
+# - Host Nginx (to be configured on Azure) will sit in
+#   front and handle TLS, routing /api/* to backend:8000,
+#   and routing / to this container on port 3000.
 # ========================================================
-FROM nginx:1.27-alpine AS runtime
+FROM node:20-alpine AS runtime
 
-# Remove default boilerplate nginx HTML
-RUN rm -rf /usr/share/nginx/html/*
+# Install 'serve' globally (Vercel's static-file server).
+# Pin to major version 14 for stability.
+RUN npm install -g serve@14 \
+    && npm cache clean --force
 
-# Copy built static assets from the builder stage
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
-# Copy optimized nginx configuration for SPA routing & Docker network proxying
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy only the compiled static assets from the builder stage.
+# No source code, no node_modules from the build stage.
+COPY --from=builder /app/dist ./dist
 
-# Expose internal HTTP port
-EXPOSE 80
+# node:20-alpine ships with a non-root 'node' user (uid 1000).
+USER node
 
-# Production healthcheck to ensure the web server is responsive
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD wget -q --spider http://127.0.0.1:80/healthz || exit 1
+# serve listens on 3000 inside the container.
+EXPOSE 3000
 
-# Start nginx in the foreground
-CMD ["nginx", "-g", "daemon off;"]
+# Healthcheck: confirm serve is responding.
+# wget is included in Alpine via busybox.
+HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget -q --spider http://127.0.0.1:3000 || exit 1
+
+# -s  : SPA mode — unknown routes fall back to index.html
+# -l  : listen port
+CMD ["serve", "-s", "dist", "-l", "3000"]

@@ -9,20 +9,23 @@ Designed specifically to operate reliably under strict hardware constraints (suc
 ## 🏛️ System Architecture
 
 ```text
-                  Host Browser
-                       │
-       ┌───────────────┴───────────────┐
-       │                               │
-Port 3000 (UI)                  Port 8000 (API / Docs)
-       │                               │
-       ▼                               ▼
+   Internet (HTTPS)                    [Local testing only]
+         │                                      │
+         ▼                                      │
+  Nginx on Azure HOST        ┌──────────────────┤
+  (configured separately)    │                  │
+    /        → :3000         ▼                  ▼
+    /api/*   → :8000    Port 3000 (UI)    Port 8000 (API / Docs)
+         │                  │                   │
+         ▼                  ▼                   ▼
 ┌─────────────────────────┐     ┌─────────────────────────┐
 │   portfolio-frontend    │     │    portfolio-backend    │
-│  (nginx:1.27-alpine)    │     │   (python:3.12-slim)    │
+│  (node:20-alpine)       │     │   (python:3.12-slim)    │
 │                         │     │                         │
 │  • Vite React SPA       │     │  • FastAPI REST API     │
-│  • Reverse proxy /api/ ───────┼──> • Uvicorn (1 worker) │
-│  • Memory: ~8-12 MiB    │     │  • Memory: ~35-45 MiB   │
+│  • 'serve' static srvr  │     │  • Uvicorn (1 worker)   │
+│  • SPA routing (‑s)     │     │  • Memory: ~35-45 MiB   │
+│  • Port 3000            │     │  • Port 8000            │
 └─────────────────────────┘     └─────────────────────────┘
               ▲                               ▲
               └───────────────┬───────────────┘
@@ -32,11 +35,12 @@ Port 3000 (UI)                  Port 8000 (API / Docs)
 ```
 
 ### Key Highlights
-- **Sub-100 MiB Total RAM Footprint**: Perfect for an 837 MiB Azure VM. Leaves >700 MiB of system memory free for the OS, Docker daemon, and future host Nginx reverse proxy.
-- **Zero Heavy Infrastructure**: No unnecessary databases (PostgreSQL/Redis), Kafka, or monitoring agents.
-- **Multi-Stage Frontend Build**: Vite compiles static assets in a build stage; runtime uses a bare `nginx:alpine` image (~25MB image size, no Node.js runtime in production).
+- **Lightweight RAM Footprint**: Designed for an 837 MiB Azure VM. No heavy infrastructure (PostgreSQL, Redis, Kafka, etc.) — just two containers.
+- **No Nginx Inside Containers**: Nginx runs only on the Azure host (to be configured separately) for SSL termination and routing. Frontend serves static files using `serve@14` (Vercel's production-grade static server).
+- **Multi-Stage Frontend Build**: Vite compiles assets in a `node:20-alpine` builder stage; the runtime stage copies only `/dist` and installs `serve` — no source code or build tools in production.
+- **SPA Client-Side Routing**: `serve -s` mode falls back to `index.html` for any unknown path, so React Router works correctly.
 - **Hardened Backend Container**: Non-root system user (`appuser`), slim Python base, no development tools, single production Uvicorn worker.
-- **Internal Docker Network Communication**: The frontend web server proxies `/api/` requests directly across `portfolio-network` to `http://backend:8000` via Docker's internal DNS.
+- **Relative API URLs**: The React app calls `/api/...` (relative paths). In production, the host Nginx routes `/api/*` to `backend:8000`. During local testing, the backend is accessible directly at `http://localhost:8000`.
 
 ---
 
@@ -80,7 +84,7 @@ When running locally, Docker maps the following host ports:
 
 | Service | Local URL | Description |
 | :--- | :--- | :--- |
-| **Frontend** | [http://localhost:3000](http://localhost:3000) | Vite + React Portfolio interface. All `/api/*` calls are routed across Docker network. |
+| **Frontend** | [http://localhost:3000](http://localhost:3000) | Vite + React SPA served by `serve`. ⚠️ `/api/*` calls from the browser require host Nginx to resolve — test the API directly at `localhost:8000` until host Nginx is configured. |
 | **Backend API** | [http://localhost:8000](http://localhost:8000) | FastAPI Root API. |
 | **API Docs (Swagger)** | [http://localhost:8000/docs](http://localhost:8000/docs) | Interactive Swagger documentation for exploring endpoints. |
 | **Health Check** | [http://localhost:8000/api/health](http://localhost:8000/api/health) | Real-time healthcheck endpoint with uptime and status data. |
@@ -100,9 +104,9 @@ Both services implement automated Docker healthchecks:
   ```
   *(Zero extra packages required inside the container).*
 - **Frontend (`portfolio-frontend`)**:
-  Queries the internal Nginx health endpoint:
+  Queries the `serve` static server directly on its port:
   ```bash
-  wget -q --spider http://localhost:80/healthz
+  wget -q --spider http://127.0.0.1:3000
   ```
 - **Service Dependency**: In `docker-compose.yml`, `frontend` declares `depends_on: { backend: { condition: service_healthy } }`. Docker ensures the backend is healthy before routing frontend traffic.
 
@@ -124,7 +128,7 @@ ENVIRONMENT=development
 APP_NAME="Mohamed Ali Maali | Portfolio API"
 
 # Allowed CORS Origins
-ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost
+ALLOWED_ORIGINS=http://localhost:3000,http://127.0.0.1:3000,http://localhost
 ```
 
 ### Security Rule:

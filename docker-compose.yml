@@ -1,7 +1,9 @@
 services:
   # ========================================================
   # Backend Service: FastAPI (Python 3.12 Slim)
-  # Lightweight microservice architecture (~35-45 MiB RAM)
+  # Exposed on host port 8000 during local testing.
+  # The Azure host Nginx will later proxy /api/* here
+  # without requiring a public port.
   # ========================================================
   backend:
     build:
@@ -10,11 +12,12 @@ services:
     container_name: portfolio-backend
     restart: unless-stopped
     ports:
-      # Exposes port 8000 on host for direct testing / Swagger docs (http://localhost:8000/docs)
+      # Exposed on host for direct testing and Swagger UI:
+      # http://localhost:8000/docs
       - "${BACKEND_PORT:-8000}:8000"
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
-      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost}
       - APP_NAME=${APP_NAME:-Mohamed Ali Maali | Portfolio API}
     networks:
       - portfolio-network
@@ -34,8 +37,14 @@ services:
           memory: 48M
 
   # ========================================================
-  # Frontend Service: Vite React served via Nginx Alpine
-  # Ultra-lightweight static file serving (~8-12 MiB RAM)
+  # Frontend Service: Vite React SPA served by 'serve'
+  # No Nginx inside this container.
+  # The Azure host Nginx (to be configured separately) will:
+  #   /       -> this container on port 3000
+  #   /api/*  -> backend container on port 8000
+  # During local testing, /api/* calls from the browser will
+  # NOT resolve (no host proxy yet) — test the API directly
+  # at http://localhost:8000/docs until host Nginx is set up.
   # ========================================================
   frontend:
     build:
@@ -44,8 +53,8 @@ services:
     container_name: portfolio-frontend
     restart: unless-stopped
     ports:
-      # Exposes port 3000 on host (http://localhost:3000)
-      - "${FRONTEND_PORT:-3000}:80"
+      # Exposed on host for local testing: http://localhost:3000
+      - "${FRONTEND_PORT:-3000}:3000"
     environment:
       - ENVIRONMENT=${ENVIRONMENT:-development}
     networks:
@@ -54,23 +63,25 @@ services:
       backend:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/healthz"]
+      # Verify 'serve' is responding on its port (not nginx)
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:3000"]
       interval: 30s
       timeout: 5s
       retries: 3
-      start_period: 5s
+      start_period: 10s
     deploy:
       resources:
         limits:
           cpus: '1.0'
-          memory: 128M
+          memory: 256M
         reservations:
           cpus: '0.1'
-          memory: 16M
+          memory: 32M
 
 # ========================================================
 # Isolated Docker Bridge Network
-# Enables internal DNS communication: frontend -> backend:8000
+# Provides internal DNS: services resolve each other by
+# name (frontend, backend) without exposing extra ports.
 # ========================================================
 networks:
   portfolio-network:

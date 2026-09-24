@@ -1,0 +1,78 @@
+services:
+  # ========================================================
+  # Backend Service: FastAPI (Python 3.12 Slim)
+  # Lightweight microservice architecture (~35-45 MiB RAM)
+  # ========================================================
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: portfolio-backend
+    restart: unless-stopped
+    ports:
+      # Exposes port 8000 on host for direct testing / Swagger docs (http://localhost:8000/docs)
+      - "${BACKEND_PORT:-8000}:8000"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost}
+      - APP_NAME=${APP_NAME:-Mohamed Ali Maali | Portfolio API}
+    networks:
+      - portfolio-network
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/health')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 256M
+        reservations:
+          cpus: '0.1'
+          memory: 48M
+
+  # ========================================================
+  # Frontend Service: Vite React served via Nginx Alpine
+  # Ultra-lightweight static file serving (~8-12 MiB RAM)
+  # ========================================================
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: portfolio-frontend
+    restart: unless-stopped
+    ports:
+      # Exposes port 3000 on host (http://localhost:3000)
+      - "${FRONTEND_PORT:-3000}:80"
+    environment:
+      - ENVIRONMENT=${ENVIRONMENT:-development}
+    networks:
+      - portfolio-network
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:80/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 5s
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 128M
+        reservations:
+          cpus: '0.1'
+          memory: 16M
+
+# ========================================================
+# Isolated Docker Bridge Network
+# Enables internal DNS communication: frontend -> backend:8000
+# ========================================================
+networks:
+  portfolio-network:
+    name: portfolio-network
+    driver: bridge

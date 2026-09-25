@@ -30,7 +30,8 @@ jobs:
             cd /web_app
 
             echo "==> Updating source code"
-            git pull --ff-only origin main
+            git fetch origin
+            git reset --hard origin/main
 
             echo "==> Building and starting containers"
             docker compose up -d --build

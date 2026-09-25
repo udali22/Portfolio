@@ -1,14 +1,14 @@
-name: Test deployment connection
+name: Deploy portfolio
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-ssh:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Test SSH connection
+      - name: Deploy to Azure VM
         env:
           DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
           DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
@@ -21,5 +21,28 @@ jobs:
           ssh \
             -i ~/.ssh/deploy_key \
             -o StrictHostKeyChecking=no \
-            "$DEPLOY_USER@$DEPLOY_HOST" \
-            'echo "SSH connection successful"; hostname; whoami'
+            "$DEPLOY_USER@$DEPLOY_HOST" << 'EOF'
+
+            set -e
+
+            cd /web_app
+
+            echo "==> Updating source code"
+            git pull --ff-only origin main
+
+            echo "==> Building and starting containers"
+            docker compose up -d --build
+
+            echo "==> Container status"
+            docker compose ps
+
+            echo "==> Backend health check"
+            curl -fsS http://127.0.0.1:8000/api/health
+
+            echo
+            echo "==> Frontend health check"
+            curl -fsSI http://127.0.0.1:3000
+
+            echo
+            echo "==> Deployment successful"
+          EOF

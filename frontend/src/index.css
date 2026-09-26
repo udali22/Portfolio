@@ -1,7 +1,8 @@
 :root {
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Outfit', sans-serif;
-  --font-mono: 'JetBrains Mono', monospace;
+  --font-sans:
+    "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-heading: "Outfit", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
 
   /* Color Palette */
   --bg-main: #07090e;
@@ -31,7 +32,9 @@
   --transition-normal: 0.25s ease;
 }
 
-*, *::before, *::after {
+*,
+*::before,
+*::after {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
@@ -48,7 +51,7 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image: 
+  background-image:
     radial-gradient(at 15% 15%, rgba(6, 182, 212, 0.08) 0px, transparent 50%),
     radial-gradient(at 85% 30%, rgba(59, 130, 246, 0.06) 0px, transparent 50%),
     radial-gradient(at 50% 85%, rgba(99, 102, 241, 0.05) 0px, transparent 50%);
@@ -57,7 +60,10 @@ body {
 }
 
 /* Typography */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-family: var(--font-heading);
   letter-spacing: -0.02em;
   font-weight: 700;
@@ -322,7 +328,7 @@ button {
 }
 
 .experience-card::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -445,7 +451,7 @@ button {
 }
 
 .exp-bullet::before {
-  content: '▹';
+  content: "▹";
   position: absolute;
   left: 0;
   color: var(--accent-cyan);
@@ -771,7 +777,8 @@ button {
   color: var(--text-secondary);
 }
 
-.form-input, .form-textarea {
+.form-input,
+.form-textarea {
   width: 100%;
   background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-color);
@@ -783,7 +790,8 @@ button {
   transition: border-color var(--transition-fast);
 }
 
-.form-input:focus, .form-textarea:focus {
+.form-input:focus,
+.form-textarea:focus {
   outline: none;
   border-color: var(--accent-cyan);
   box-shadow: 0 0 0 2px var(--accent-cyan-glow);

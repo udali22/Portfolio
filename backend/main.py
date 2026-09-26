@@ -1,7 +1,7 @@
 import os
 import time
 from typing import List, Optional
-from fastapi import FastAPI, HTTPException, status
+from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
@@ -10,7 +10,7 @@ APP_NAME = os.getenv("APP_NAME", "Mohamed Ali Maali | Portfolio API")
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
-    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost"
+    "http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost",
 ).split(",")
 
 app = FastAPI(
@@ -105,7 +105,9 @@ class SkillGroup(BaseModel):
 
 class ContactMessage(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
-    email: str = Field(..., min_length=5, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+    email: str = Field(
+        ..., min_length=5, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
+    )
     subject: Optional[str] = Field(None, max_length=150)
     message: str = Field(..., min_length=10, max_length=2000)
 
@@ -138,8 +140,8 @@ PORTFOLIO_PROFILE = ProfileData(
         "Engineering Degree with Highest Honors (Mention Très Bien) from ISIMG Gabès.",
         "Architected 7 microservices behind Spring Cloud Gateway with Eureka & RS256 JWT auth.",
         "Built 5-stage AI document pipelines in FastAPI with LangGraph, Groq Vision, and Kafka.",
-        "Engineered real-time Whisper speech diarization and LLM summarization cutting consultation reporting by 45%."
-    ]
+        "Engineered real-time Whisper speech diarization and LLM summarization cutting consultation reporting by 45%.",
+    ],
 )
 
 PORTFOLIO_EXPERIENCES: List[Experience] = [
@@ -159,12 +161,23 @@ PORTFOLIO_EXPERIENCES: List[Experience] = [
             "Built a 5-stage AI document pipeline (Perception → Extraction → Refiner → Compliance → Control) in Python/FastAPI with LangGraph, migrating from Tesseract OCR to Groq Vision (LLM) for higher accuracy, human-in-the-loop review, full audit trail, and AML/OFAC sanctions screening (RapidFuzz).",
             "Set up real-time event-driven communication (Kafka, Redis/TaskIQ, WebSocket) and containerized services with Docker.",
             "AiVision: Built a full-stack AI maturity-assessment platform (Node.js/Express + FastAPI + React/TypeScript) scoring organizations across 5 dimensions via a provider-agnostic LLM layer (OpenAI, Claude, Gemini, Groq, OpenRouter) producing structured, auditable 1–3 scores with confidence levels and cited evidence.",
-            "Built the REST API (Express, Prisma/PostgreSQL on Supabase, JWT, RBAC), React/Recharts dashboards, audio transcription, and automated PDF reports (Puppeteer)."
+            "Built the REST API (Express, Prisma/PostgreSQL on Supabase, JWT, RBAC), React/Recharts dashboards, audio transcription, and automated PDF reports (Puppeteer).",
         ],
         technologies=[
-            "Spring Boot 3", "Spring Cloud", "FastAPI", "Python", "LangGraph", "Groq Vision",
-            "Kafka", "Redis / TaskIQ", "WebSocket", "PostgreSQL", "Docker", "Node.js", "React 19"
-        ]
+            "Spring Boot 3",
+            "Spring Cloud",
+            "FastAPI",
+            "Python",
+            "LangGraph",
+            "Groq Vision",
+            "Kafka",
+            "Redis / TaskIQ",
+            "WebSocket",
+            "PostgreSQL",
+            "Docker",
+            "Node.js",
+            "React 19",
+        ],
     ),
     Experience(
         id="wico-technologies",
@@ -180,9 +193,17 @@ PORTFOLIO_EXPERIENCES: List[Experience] = [
         achievements=[
             "Built the backend of a shared-taxi trip management platform with Spring Boot: secured REST API, session management, and Spring Security.",
             "Developed the mobile frontend (Angular/Ionic) with real-time booking and trip tracking via WebSockets.",
-            "Modeled key business entities (clients, drivers, trips, bookings) on MariaDB, operating in an Agile (Scrum) sprint methodology."
+            "Modeled key business entities (clients, drivers, trips, bookings) on MariaDB, operating in an Agile (Scrum) sprint methodology.",
         ],
-        technologies=["Spring Boot", "Spring Security", "Angular", "Ionic", "WebSockets", "MariaDB", "Scrum"]
+        technologies=[
+            "Spring Boot",
+            "Spring Security",
+            "Angular",
+            "Ionic",
+            "WebSockets",
+            "MariaDB",
+            "Scrum",
+        ],
     ),
     Experience(
         id="tunisie-telecom",
@@ -196,10 +217,15 @@ PORTFOLIO_EXPERIENCES: List[Experience] = [
         ),
         achievements=[
             "Contributed to the deployment and verification of the HUB4 infrastructure connecting 20,000+ residents in the Douz region.",
-            "Assisted network engineers with optical distribution frame routing, signal diagnostics, and physical network testing."
+            "Assisted network engineers with optical distribution frame routing, signal diagnostics, and physical network testing.",
         ],
-        technologies=["Network Infrastructure", "HUB4 Deployment", "Fiber Optics", "Routing & Diagnostics"]
-    )
+        technologies=[
+            "Network Infrastructure",
+            "HUB4 Deployment",
+            "Fiber Optics",
+            "Routing & Diagnostics",
+        ],
+    ),
 ]
 
 PORTFOLIO_PROJECTS: List[Project] = [
@@ -212,10 +238,17 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "via SignalR, robust relational persistence with Entity Framework Core, and modern dynamic client interfaces."
         ),
         category="Distributed Systems",
-        technologies=[".NET 8", "EF Core", "PostgreSQL", "ASP.NET Core MVC", "KnockoutJS", "SignalR"],
+        technologies=[
+            ".NET 8",
+            "EF Core",
+            "PostgreSQL",
+            "ASP.NET Core MVC",
+            "KnockoutJS",
+            "SignalR",
+        ],
         github_url="https://github.com/udali22/TaskFlow",
         demo_url=None,
-        featured=True
+        featured=True,
     ),
     Project(
         id="rasmi",
@@ -229,7 +262,7 @@ PORTFOLIO_PROJECTS: List[Project] = [
         technologies=["FastAPI", "Python", "Angular 17", "Ollama", "Docker", "Vercel"],
         github_url="https://github.com/udali22/Rasmi",
         demo_url="https://rasmi-alpha.vercel.app",
-        featured=True
+        featured=True,
     ),
     Project(
         id="labes-pfa",
@@ -240,10 +273,18 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "speaker diarization, and an LLM generating structured summaries to assist doctors (cut report time from 20 to 11 min in physician tests)."
         ),
         category="AI & Audio Processing",
-        technologies=["FastAPI", "Whisper", "PyAnnote", "Express.js", "React", "MySQL", "PyTorch"],
+        technologies=[
+            "FastAPI",
+            "Whisper",
+            "PyAnnote",
+            "Express.js",
+            "React",
+            "MySQL",
+            "PyTorch",
+        ],
         github_url="https://github.com/udali22/LabesSolution_Transcrition",
         demo_url=None,
-        featured=True
+        featured=True,
     ),
     Project(
         id="docucheck",
@@ -254,10 +295,19 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "LangGraph AI document pipeline integrating Groq Vision LLM and automated sanctions screening."
         ),
         category="Enterprise Microservices",
-        technologies=["Spring Boot 3", "Spring Cloud", "FastAPI", "LangGraph", "Groq Vision", "Kafka", "PostgreSQL", "React 19"],
+        technologies=[
+            "Spring Boot 3",
+            "Spring Cloud",
+            "FastAPI",
+            "LangGraph",
+            "Groq Vision",
+            "Kafka",
+            "PostgreSQL",
+            "React 19",
+        ],
         github_url="https://gitlab.com/dashboard/projects",
         demo_url=None,
-        featured=True
+        featured=True,
     ),
     Project(
         id="aivision",
@@ -268,10 +318,18 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "with confidence levels, interactive Recharts dashboards, and automated PDF report synthesis."
         ),
         category="AI & Cloud Platforms",
-        technologies=["Node.js", "Express", "FastAPI", "React", "TypeScript", "Prisma", "Supabase"],
+        technologies=[
+            "Node.js",
+            "Express",
+            "FastAPI",
+            "React",
+            "TypeScript",
+            "Prisma",
+            "Supabase",
+        ],
         github_url="https://gitlab.com/dashboard/projects",
         demo_url=None,
-        featured=True
+        featured=True,
     ),
     Project(
         id="labes-booking",
@@ -282,10 +340,17 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "and optimized REST APIs delivering a 95% booking success rate."
         ),
         category="Full-Stack Web",
-        technologies=["Node.js", "Express", "React", "JWT Auth", "Tailwind CSS", "MongoDB"],
+        technologies=[
+            "Node.js",
+            "Express",
+            "React",
+            "JWT Auth",
+            "Tailwind CSS",
+            "MongoDB",
+        ],
         github_url="https://github.com/udali22/Labes_Solutions",
         demo_url=None,
-        featured=True
+        featured=True,
     ),
     Project(
         id="louage-tunisie",
@@ -296,11 +361,18 @@ PORTFOLIO_PROJECTS: List[Project] = [
             "application modeling trips, drivers, and bookings."
         ),
         category="Mobile & Distributed",
-        technologies=["Spring Boot", "Spring Security", "Angular", "Ionic", "WebSockets", "MariaDB"],
+        technologies=[
+            "Spring Boot",
+            "Spring Security",
+            "Angular",
+            "Ionic",
+            "WebSockets",
+            "MariaDB",
+        ],
         github_url="https://github.com/udali22/LouageTunisie",
         demo_url=None,
-        featured=True
-    )
+        featured=True,
+    ),
 ]
 
 PORTFOLIO_EDUCATION: List[EducationItem] = [
@@ -309,61 +381,92 @@ PORTFOLIO_EDUCATION: List[EducationItem] = [
         institution="ISIMG Gabès",
         period="Sept. 2023 – Sept. 2026",
         honors="Graduated with Highest Honors (Mention Très Bien)",
-        details="Yearly averages: 12.06 | 13.86 | 15.07 | 17.00 / 20"
+        details="Yearly averages: 12.06 | 13.86 | 15.07 | 17.00 / 20",
     ),
     EducationItem(
         degree="Integrated Preparatory Cycle in Computer Science",
         institution="ISIMG Gabès",
         period="Sept. 2021 – Jun. 2023",
         honors="Graduated with Honors (Mention Bien)",
-        details="Intensive foundations in mathematics, algorithmic analysis, physics, and software design."
-    )
+        details="Intensive foundations in mathematics, algorithmic analysis, physics, and software design.",
+    ),
 ]
 
 PORTFOLIO_CERTIFICATIONS: List[CertificationItem] = [
     CertificationItem(
-        title="Model Context Protocol",
-        issuer="Anthropic Academy",
-        date="Mar. 2026"
+        title="Model Context Protocol", issuer="Anthropic Academy", date="Mar. 2026"
     ),
-    CertificationItem(
-        title="Python for Data Science",
-        issuer="IBM",
-        date="Oct. 2024"
-    )
+    CertificationItem(title="Python for Data Science", issuer="IBM", date="Oct. 2024"),
 ]
 
 PORTFOLIO_SKILLS: List[SkillGroup] = [
     SkillGroup(
         category="Backend & Microservices",
         description="Distributed systems, enterprise APIs, and asynchronous message brokers",
-        skills=["Spring Boot 3", "Spring Cloud", "REST APIs", "FastAPI", "Node.js/Express", "Kafka", "WebSocket", ".NET 8 / EF Core"]
+        skills=[
+            "Spring Boot 3",
+            "Spring Cloud",
+            "REST APIs",
+            "FastAPI",
+            "Node.js/Express",
+            "Kafka",
+            "WebSocket",
+            ".NET 8 / EF Core",
+        ],
     ),
     SkillGroup(
         category="Programming Languages",
         description="Primary compiled and scripting languages for systems and pipelines",
-        skills=["Java", "Python", "JavaScript / TypeScript", "C#"]
+        skills=["Java", "Python", "JavaScript / TypeScript", "C#"],
     ),
     SkillGroup(
         category="Databases & Storage",
         description="Relational and NoSQL persistent storage engines",
-        skills=["PostgreSQL", "MySQL", "MongoDB", "MariaDB", "Microsoft SQL Server", "Prisma / Supabase"]
+        skills=[
+            "PostgreSQL",
+            "MySQL",
+            "MongoDB",
+            "MariaDB",
+            "Microsoft SQL Server",
+            "Prisma / Supabase",
+        ],
     ),
     SkillGroup(
         category="AI & Machine Learning",
         description="Production LLM orchestration, document OCR, speech AI, and NLP",
-        skills=["LLM Integration (Groq Vision)", "LangGraph", "Transformers", "Whisper Fine-tuning", "PyAnnote", "RapidFuzz"]
+        skills=[
+            "LLM Integration (Groq Vision)",
+            "LangGraph",
+            "Transformers",
+            "Whisper Fine-tuning",
+            "PyAnnote",
+            "RapidFuzz",
+        ],
     ),
     SkillGroup(
         category="Frontend & Mobile",
         description="Responsive web interfaces, state architecture, and mobile cross-platform",
-        skills=["React 19 / TypeScript", "Angular", "ASP.NET Core MVC", "Tailwind CSS", "Ionic"]
+        skills=[
+            "React 19 / TypeScript",
+            "Angular",
+            "ASP.NET Core MVC",
+            "Tailwind CSS",
+            "Ionic",
+        ],
     ),
     SkillGroup(
         category="DevOps & Methodologies",
         description="Containerization, automated pipelines, testing, and agile workflows",
-        skills=["Docker", "Git", "GitHub Actions", "GitLab CI", "Agile / Scrum", "Unit Testing (xUnit)", "Postman"]
-    )
+        skills=[
+            "Docker",
+            "Git",
+            "GitHub Actions",
+            "GitLab CI",
+            "Agile / Scrum",
+            "Unit Testing (xUnit)",
+            "Postman",
+        ],
+    ),
 ]
 
 
@@ -375,7 +478,7 @@ def root():
     return {
         "message": f"Welcome to {APP_NAME}",
         "docs": "/docs",
-        "health": "/api/health"
+        "health": "/api/health",
     }
 
 
@@ -387,7 +490,7 @@ def health_check():
         service="portfolio-backend",
         environment=ENVIRONMENT,
         uptime_seconds=round(now - START_TIME, 2),
-        timestamp=now
+        timestamp=now,
     )
 
 
@@ -412,7 +515,7 @@ def get_projects(category: Optional[str] = None):
 def get_education():
     return {
         "education": PORTFOLIO_EDUCATION,
-        "certifications": PORTFOLIO_CERTIFICATIONS
+        "certifications": PORTFOLIO_CERTIFICATIONS,
     }
 
 
@@ -421,10 +524,15 @@ def get_skills():
     return PORTFOLIO_SKILLS
 
 
-@app.post("/api/contact", response_model=ContactResponse, status_code=status.HTTP_201_CREATED, tags=["Contact"])
+@app.post(
+    "/api/contact",
+    response_model=ContactResponse,
+    status_code=status.HTTP_201_CREATED,
+    tags=["Contact"],
+)
 def send_contact_message(msg: ContactMessage):
     return ContactResponse(
         success=True,
         message="Thank you! Your message has been received.",
-        received_name=msg.name
+        received_name=msg.name,
     )

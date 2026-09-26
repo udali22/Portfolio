@@ -35,6 +35,9 @@ jobs:
 
             echo "==> Building and starting containers"
             docker compose up -d --build
+              
+            echo "==> Waiting for frontend"
+            sleep 10
 
             echo "==> Container status"
             docker compose ps

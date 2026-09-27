@@ -16,6 +16,7 @@ import {
   Sparkles,
   Layers,
   ChevronRight,
+  Download,
 } from "lucide-react";
 
 export default function App() {
@@ -30,6 +31,7 @@ export default function App() {
   const [formState, setFormState] = useState({
     name: "",
     email: "",
+    subject: "",
     message: "",
   });
   const [formStatus, setFormStatus] = useState({
@@ -93,14 +95,19 @@ export default function App() {
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
-    if (!formState.name || !formState.email || !formState.message) return;
+    if (!formState.name || !formState.message) return;
 
     setFormStatus({ loading: true, success: false, message: "" });
     try {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formState),
+        body: JSON.stringify({
+          name: formState.name,
+          email: formState.email || undefined,
+          subject: formState.subject || undefined,
+          message: formState.message,
+        }),
       });
 
       if (res.ok) {
@@ -110,13 +117,18 @@ export default function App() {
           success: true,
           message: data.message || "Thank you! Your message has been sent.",
         });
-        setFormState({ name: "", email: "", message: "" });
+        setFormState({ name: "", email: "", subject: "", message: "" });
       } else {
+        let errMsg =
+          "Failed to send message. Please try again or reach out via email.";
+        try {
+          const errData = await res.json();
+          if (errData?.detail) errMsg = errData.detail;
+        } catch (_) {}
         setFormStatus({
           loading: false,
           success: false,
-          message:
-            "Failed to send message. Please try again or reach out via email.",
+          message: errMsg,
         });
       }
     } catch {
@@ -141,7 +153,8 @@ export default function App() {
     email: "maalimohamedalieng@gmail.com",
     phone: "+216 95 088 782",
     github_url: "https://github.com/udali22",
-    linkedin_url: "https://www.linkedin.com/in/mohamed-ali-maali-478709218/",
+    linkedin_url: "https://www.linkedin.com/in/maali-mohamed-ali-478709218/",
+    photo_url: "/profile.jpg",
     status_badge: "Seeking a Junior Backend / Software Engineering Role",
     highlights: [
       "Engineering Degree in Software Engineering with Highest Honors (Mention Très Bien) from ISIMG Gabès.",
@@ -231,6 +244,26 @@ export default function App() {
   ];
 
   const defaultProjects = [
+    {
+      id: "portfolio",
+      title: "Portfolio - Production-Ready Personal Portfolio & Deployment",
+      tagline:
+        "Full-stack portfolio with React & FastAPI, deployed on Azure VM with CI/CD.",
+      description:
+        "Production-ready personal portfolio containerized with Docker and Docker Compose. Deployed on an Azure Linux VM behind Nginx with custom domain, HTTPS/Let's Encrypt, automated GitHub Actions CI/CD with pull-request protection, automated backend tests, and GoAccess/btop server monitoring.",
+      category: "DevOps & Cloud",
+      technologies: [
+        "React",
+        "FastAPI",
+        "Docker",
+        "Docker Compose",
+        "Nginx",
+        "Azure",
+        "GitHub Actions",
+        "Python",
+      ],
+      github_url: "https://github.com/udali22/Portfolio",
+    },
     {
       id: "taskflow",
       title: "TaskFlow - Real-Time Collaborative Kanban Platform",
@@ -508,6 +541,24 @@ export default function App() {
 
           <div className="nav-socials">
             <a
+              href="/Mohamed_Ali_Maali_CV.pdf"
+              download="Mohamed_Ali_Maali_CV.pdf"
+              className="btn btn-secondary"
+              style={{
+                padding: "0.42rem 0.85rem",
+                fontSize: "0.82rem",
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.4rem",
+                borderColor: "rgba(6, 182, 212, 0.4)",
+                color: "var(--accent-cyan)",
+              }}
+              title="Download CV (PDF)"
+            >
+              <Download size={14} />
+              <span>CV</span>
+            </a>
+            <a
               href={pData.github_url}
               target="_blank"
               rel="noreferrer"
@@ -539,53 +590,97 @@ export default function App() {
       {/* Hero / About Section */}
       <section className="hero" id="about">
         <div className="container">
-          <div className="hero-pill">
-            <Sparkles size={14} />
-            <span>{pData.title}</span>
-          </div>
+          <div className="hero-inner">
+            {/* Left — Text Content */}
+            <div className="hero-content">
+              <div className="hero-pill">
+                <Sparkles size={14} />
+                <span>{pData.title}</span>
+              </div>
 
-          <h1 className="hero-title">
-            Hi, I'm <span className="hero-gradient">{pData.name}</span>
-          </h1>
+              <h1 className="hero-title">
+                Hi, I'm <span className="hero-gradient">{pData.name}</span>
+              </h1>
 
-          <p className="hero-subtitle">{pData.headline}</p>
+              <p className="hero-subtitle">{pData.headline}</p>
 
-          <div className="hero-meta-bar">
-            <div className="hero-meta-item">
-              <GraduationCap size={16} color="var(--accent-cyan)" />
-              <span>ISIMG Gabès &bull; Highest Honors (Mention Très Bien)</span>
-            </div>
-            <div className="hero-meta-item">
-              <MapPin size={16} color="var(--accent-cyan)" />
-              <span>{pData.location}</span>
-            </div>
-            <div className="hero-meta-item">
-              <Mail size={16} color="var(--accent-cyan)" />
-              <a
-                href={`mailto:${pData.email}`}
-                style={{ color: "var(--text-primary)" }}
-              >
-                {pData.email}
-              </a>
-            </div>
-            <div className="hero-meta-item">
-              <Phone size={16} color="var(--accent-cyan)" />
-              <span>{pData.phone}</span>
-            </div>
-          </div>
+              <div className="hero-meta-bar">
+                <div className="hero-meta-item">
+                  <GraduationCap size={16} color="var(--accent-cyan)" />
+                  <span>
+                    ISIMG Gabès &bull; Highest Honors (Mention Très Bien)
+                  </span>
+                </div>
+                <div className="hero-meta-item">
+                  <MapPin size={16} color="var(--accent-cyan)" />
+                  <span>{pData.location}</span>
+                </div>
+                <div className="hero-meta-item">
+                  <Mail size={16} color="var(--accent-cyan)" />
+                  <a
+                    href={`mailto:${pData.email}`}
+                    style={{ color: "var(--text-primary)" }}
+                  >
+                    {pData.email}
+                  </a>
+                </div>
+                <div className="hero-meta-item">
+                  <Phone size={16} color="var(--accent-cyan)" />
+                  <span>{pData.phone}</span>
+                </div>
+              </div>
 
-          <div className="hero-actions">
-            <a href="#experience" className="btn btn-primary">
-              <Briefcase size={16} />
-              <span>View Experience</span>
-            </a>
-            <a href="#projects" className="btn btn-secondary">
-              <span>Explore Projects</span>
-              <ArrowUpRight size={16} />
-            </a>
-            <a href="#contact" className="btn btn-secondary">
-              <span>Contact Me</span>
-            </a>
+              <div className="hero-actions">
+                <a href="#experience" className="btn btn-primary">
+                  <Briefcase size={16} />
+                  <span>View Experience</span>
+                </a>
+                <a
+                  href="/Mohamed_Ali_Maali_CV.pdf"
+                  download="Mohamed_Ali_Maali_CV.pdf"
+                  className="btn btn-primary"
+                  style={{
+                    background:
+                      "linear-gradient(135deg, rgba(6, 182, 212, 0.25), rgba(99, 102, 241, 0.25))",
+                    borderColor: "var(--accent-cyan)",
+                    color: "var(--accent-cyan)",
+                    boxShadow: "0 0 16px rgba(6, 182, 212, 0.25)",
+                  }}
+                >
+                  <Download size={16} />
+                  <span>Download CV</span>
+                </a>
+                <a href="#projects" className="btn btn-secondary">
+                  <span>Explore Projects</span>
+                  <ArrowUpRight size={16} />
+                </a>
+                <a
+                  href={
+                    pData.linkedin_url ||
+                    "https://www.linkedin.com/in/maali-mohamed-ali-478709218/"
+                  }
+                  target="_blank"
+                  rel="noreferrer"
+                  className="btn btn-secondary"
+                >
+                  <Linkedin size={16} />
+                  <span>LinkedIn</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Right — Profile Photo */}
+            <div className="hero-photo-wrapper">
+              <div className="hero-photo-ring">
+                <div className="hero-photo-inner">
+                  <img
+                    src={pData.photo_url || "/profile.jpg"}
+                    alt={pData.name}
+                    className="hero-photo"
+                  />
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -947,36 +1042,54 @@ export default function App() {
                 </div>
               )}
 
-              <div className="form-group">
-                <label className="form-label" htmlFor="contact-name">
-                  Your Name
-                </label>
-                <input
-                  id="contact-name"
-                  type="text"
-                  required
-                  placeholder="e.g. Hiring Manager / Recruiter"
-                  className="form-input"
-                  value={formState.name}
-                  onChange={(e) =>
-                    setFormState({ ...formState, name: e.target.value })
-                  }
-                />
+              <div className="form-row">
+                <div className="form-group">
+                  <label className="form-label" htmlFor="contact-name">
+                    Your Name
+                  </label>
+                  <input
+                    id="contact-name"
+                    type="text"
+                    required
+                    placeholder="e.g. Alex Dupont / Hiring Manager"
+                    className="form-input"
+                    value={formState.name}
+                    onChange={(e) =>
+                      setFormState({ ...formState, name: e.target.value })
+                    }
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label className="form-label" htmlFor="contact-email">
+                    Your Email
+                  </label>
+                  <input
+                    id="contact-email"
+                    type="email"
+                    required
+                    placeholder="alex@company.com"
+                    className="form-input"
+                    value={formState.email}
+                    onChange={(e) =>
+                      setFormState({ ...formState, email: e.target.value })
+                    }
+                  />
+                </div>
               </div>
 
               <div className="form-group">
-                <label className="form-label" htmlFor="contact-email">
-                  Email Address
+                <label className="form-label" htmlFor="contact-subject">
+                  Subject
                 </label>
                 <input
-                  id="contact-email"
-                  type="email"
-                  required
-                  placeholder="recruiter@company.com"
+                  id="contact-subject"
+                  type="text"
+                  placeholder="e.g. Software Engineering Opportunity / Collaboration"
                   className="form-input"
-                  value={formState.email}
+                  value={formState.subject}
                   onChange={(e) =>
-                    setFormState({ ...formState, email: e.target.value })
+                    setFormState({ ...formState, subject: e.target.value })
                   }
                 />
               </div>
@@ -988,7 +1101,7 @@ export default function App() {
                 <textarea
                   id="contact-message"
                   required
-                  rows={4}
+                  rows={5}
                   placeholder="Describe the opportunity, role requirements, or collaboration..."
                   className="form-textarea"
                   value={formState.message}

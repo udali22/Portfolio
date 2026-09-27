@@ -19,6 +19,9 @@ services:
       - ENVIRONMENT=${ENVIRONMENT:-development}
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-http://localhost:3000,http://127.0.0.1:3000,http://localhost}
       - APP_NAME=${APP_NAME:-Mohamed Ali Maali | Portfolio API}
+      - GMAIL_SENDER=${GMAIL_SENDER}
+      - GMAIL_APP_PASSWORD=${GMAIL_APP_PASSWORD}
+      - CONTACT_RECEIVER=${CONTACT_RECEIVER}
     networks:
       - portfolio-network
     healthcheck:

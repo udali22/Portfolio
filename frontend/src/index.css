@@ -183,8 +183,112 @@ button {
 
 /* Hero Section */
 .hero {
-  padding: 6.5rem 0 4rem;
+  padding: 2.5rem 0 2.5rem;
   text-align: left;
+}
+
+/* Two-column hero layout */
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 4rem;
+}
+
+@media (max-width: 860px) {
+  .hero-inner {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+  .hero-photo-wrapper {
+    justify-self: center;
+    order: -1;
+  }
+}
+
+.hero-content {
+  min-width: 0;
+}
+
+/* Profile photo */
+.hero-photo-wrapper {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+@keyframes spin-ring {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes pulse-glow {
+  0%,
+  100% {
+    box-shadow:
+      0 0 28px rgba(6, 182, 212, 0.45),
+      0 0 60px rgba(6, 182, 212, 0.15);
+  }
+  50% {
+    box-shadow:
+      0 0 40px rgba(6, 182, 212, 0.65),
+      0 0 80px rgba(6, 182, 212, 0.25);
+  }
+}
+
+/* Outer container: fixed size, no transform */
+.hero-photo-ring {
+  width: 260px;
+  height: 260px;
+  border-radius: 50%;
+  position: relative;
+  flex-shrink: 0;
+  animation: pulse-glow 3s ease-in-out infinite;
+}
+
+/* The spinning gradient ring — positioned absolutely behind photo */
+.hero-photo-ring::before {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent-cyan) 0%,
+    var(--accent-blue) 35%,
+    transparent 50%,
+    var(--accent-purple) 70%,
+    var(--accent-cyan) 100%
+  );
+  animation: spin-ring 6s linear infinite;
+  z-index: 0;
+}
+
+/* Inner photo wrapper: clips image to circle, sits above the ring */
+.hero-photo-inner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--bg-surface);
+  border: 4px solid var(--bg-main);
+  position: relative;
+  z-index: 1;
+}
+
+.hero-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  display: block;
+  filter: brightness(1.05) contrast(1.02);
 }
 
 .hero-pill {
@@ -216,9 +320,9 @@ button {
 }
 
 .hero-subtitle {
-  font-size: 1.2rem;
+  font-size: 1.15rem;
   color: var(--text-secondary);
-  max-width: 720px;
+  max-width: 620px;
   margin-bottom: 2rem;
   line-height: 1.7;
 }
@@ -226,9 +330,9 @@ button {
 .hero-meta-bar {
   display: flex;
   flex-wrap: wrap;
-  gap: 1.5rem;
+  gap: 1.25rem;
   margin-bottom: 2.25rem;
-  font-size: 0.9rem;
+  font-size: 0.875rem;
   color: var(--text-secondary);
 }
 
@@ -763,6 +867,18 @@ button {
   display: flex;
   flex-direction: column;
   gap: 1.25rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+@media (max-width: 600px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
 }
 
 .form-group {

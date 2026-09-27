@@ -1,9 +1,21 @@
 import os
 import time
+import smtplib
+import logging
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import formataddr
 from typing import List, Optional
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+
+# Load .env from project root (one level above backend/)
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Application metadata
 APP_NAME = os.getenv("APP_NAME", "Mohamed Ali Maali | Portfolio API")
@@ -12,6 +24,11 @@ ALLOWED_ORIGINS = os.getenv(
     "ALLOWED_ORIGINS",
     "http://localhost:3000,http://127.0.0.1:3000,http://localhost:80,http://localhost",
 ).split(",")
+
+# Gmail SMTP config
+GMAIL_SENDER = os.getenv("GMAIL_SENDER", "")
+GMAIL_APP_PASSWORD = os.getenv("GMAIL_APP_PASSWORD", "")
+CONTACT_RECEIVER = os.getenv("CONTACT_RECEIVER", GMAIL_SENDER)
 
 app = FastAPI(
     title=APP_NAME,
@@ -105,11 +122,9 @@ class SkillGroup(BaseModel):
 
 class ContactMessage(BaseModel):
     name: str = Field(..., min_length=2, max_length=100)
-    email: str = Field(
-        ..., min_length=5, max_length=255, pattern=r"^[^@\s]+@[^@\s]+\.[^@\s]+$"
-    )
+    email: Optional[str] = Field(None, max_length=255)
     subject: Optional[str] = Field(None, max_length=150)
-    message: str = Field(..., min_length=10, max_length=2000)
+    message: str = Field(..., min_length=2, max_length=2000)
 
 
 class ContactResponse(BaseModel):
@@ -134,7 +149,7 @@ PORTFOLIO_PROFILE = ProfileData(
     email="maalimohamedalieng@gmail.com",
     phone="+216 95 088 782",
     github_url="https://github.com/udali22",
-    linkedin_url="https://www.linkedin.com/in/mohamed-ali-maali-478709218/",
+    linkedin_url="https://www.linkedin.com/in/maali-mohamed-ali-478709218/",
     status_badge="Open to Software Engineering & Backend Roles",
     highlights=[
         "Engineering Degree with Highest Honors (Mention Très Bien) from ISIMG Gabès.",
@@ -229,6 +244,30 @@ PORTFOLIO_EXPERIENCES: List[Experience] = [
 ]
 
 PORTFOLIO_PROJECTS: List[Project] = [
+    Project(
+        id="portfolio",
+        title="Portfolio - Production-Ready Personal Portfolio & Deployment",
+        tagline="Production-ready personal portfolio & automated deployment project.",
+        description=(
+            "Full-stack portfolio with React/TypeScript frontend and FastAPI backend, containerized with Docker & Docker Compose. "
+            "Deployed on an Azure Linux VM behind Nginx with custom domain, HTTPS/Let's Encrypt, firewall configuration, "
+            "automated GitHub Actions CI/CD with pull-request protection, automated backend tests, and GoAccess/btop server monitoring."
+        ),
+        category="DevOps & Cloud",
+        technologies=[
+            "React",
+            "FastAPI",
+            "Docker",
+            "Docker Compose",
+            "Nginx",
+            "Azure",
+            "GitHub Actions",
+            "Python",
+        ],
+        github_url="https://github.com/udali22/Portfolio",
+        demo_url=None,
+        featured=True,
+    ),
     Project(
         id="taskflow",
         title="TaskFlow - Real-time Collaborative Kanban Platform",
@@ -531,8 +570,84 @@ def get_skills():
     tags=["Contact"],
 )
 def send_contact_message(msg: ContactMessage):
+    """Receive a contact form submission and forward it by email via Gmail SMTP."""
+
+    # Build the HTML email body
+    email_line = (
+        f'<p style="margin:0 0 12px;"><strong>Email:</strong> <a href="mailto:{msg.email}">{msg.email}</a></p>'
+        if msg.email
+        else ""
+    )
+    subject_line = (
+        f'<p style="margin:0 0 12px;"><strong>Subject:</strong> {msg.subject}</p>'
+        if msg.subject
+        else ""
+    )
+
+    html_body = f"""
+    <html><body style="font-family: Arial, sans-serif; background:#f4f4f4; padding:24px;">
+      <div style="max-width:600px;margin:0 auto;background:#fff;border-radius:8px;
+                  border:1px solid #e0e0e0;overflow:hidden;">
+        <div style="background:#06b6d4;padding:20px 28px;">
+          <h2 style="color:#fff;margin:0;">&#128234; New Portfolio Contact</h2>
+        </div>
+        <div style="padding:28px;">
+          <p style="margin:0 0 12px;"><strong>Name:</strong> {msg.name}</p>
+          {email_line}
+          {subject_line}
+          <hr style="border:none;border-top:1px solid #eee;margin:16px 0;">
+          <p style="margin:0 0 8px;"><strong>Message:</strong></p>
+          <p style="background:#f9f9f9;padding:14px;border-radius:6px;
+                    white-space:pre-wrap;margin:0;">{msg.message}</p>
+        </div>
+        <div style="background:#f9f9f9;padding:14px 28px;
+                    font-size:12px;color:#888;border-top:1px solid #eee;">
+          Sent via portfolio contact form — Mohamed Ali Maali
+        </div>
+      </div>
+    </body></html>
+    """
+
+    subject = f"[Portfolio Contact] Message from {msg.name}"
+    if msg.subject:
+        subject = f"[Portfolio] {msg.subject} — {msg.name}"
+
+    # Send via Gmail SMTP if credentials are configured
+    if GMAIL_SENDER and GMAIL_APP_PASSWORD and CONTACT_RECEIVER:
+        try:
+            mime = MIMEMultipart("alternative")
+            mime["Subject"] = subject
+
+            # From: display the visitor's name (Gmail requires the address to stay ours)
+            # Reply-To: visitor's email so your reply goes directly to them
+            mime["From"] = formataddr((msg.name, GMAIL_SENDER))
+            mime["To"] = CONTACT_RECEIVER
+            if msg.email:
+                mime["Reply-To"] = formataddr((msg.name, msg.email))
+            mime.attach(MIMEText(html_body, "html", "utf-8"))
+
+            with smtplib.SMTP("smtp.gmail.com", 587) as server:
+                server.ehlo()
+                server.starttls()
+                server.login(GMAIL_SENDER, GMAIL_APP_PASSWORD)
+                server.sendmail(GMAIL_SENDER, CONTACT_RECEIVER, mime.as_string())
+
+            logger.info("Contact email sent from %s to %s", msg.name, CONTACT_RECEIVER)
+        except Exception as exc:
+            logger.error("Failed to send contact email: %s", exc)
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to send your message. Please reach out directly by email.",
+            )
+    else:
+        logger.warning(
+            "SMTP not configured. Message from %s not emailed. "
+            "Set GMAIL_SENDER, GMAIL_APP_PASSWORD, CONTACT_RECEIVER in .env",
+            msg.name,
+        )
+
     return ContactResponse(
         success=True,
-        message="Thank you! Your message has been received.",
+        message="Thank you! Your message has been received. I'll get back to you soon.",
         received_name=msg.name,
     )

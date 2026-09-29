@@ -1,0 +1,14 @@
+{
+  "name": "portfolio-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright E2E tests for Mohamed Ali Maali's portfolio",
+  "scripts": {
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}

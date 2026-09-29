@@ -1,0 +1,75 @@
+name: Periodic Security Scan
+
+on:
+  schedule:
+    # Run every Monday at 04:00 UTC
+    - cron: '0 4 * * 1'
+  workflow_dispatch:
+
+jobs:
+  python-security:
+    name: Backend Security (SAST & SCA)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install bandit pip-audit
+
+      - name: Bandit SAST Scan
+        run: bandit -r . -c ../.bandit
+
+      - name: Dependency Vulnerability Audit (pip-audit)
+        run: pip-audit -r requirements.txt
+
+  node-security:
+    name: Frontend Security (SCA)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: NPM Dependency Audit
+        run: npm audit --audit-level=high
+
+  endpoint-health:
+    name: Production Endpoint Health & SSL Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check HTTPS status and security headers
+        run: |
+          curl -sI --max-time 10 https://mohamedali-maali.duckdns.org | tee headers.txt
+          grep -i "strict-transport-security" headers.txt
+          grep -i "x-content-type-options" headers.txt
+          grep -i "x-frame-options" headers.txt
+
+      - name: Check API health endpoint
+        run: |
+          curl -fsS --max-time 10 https://mohamedali-maali.duckdns.org/api/health

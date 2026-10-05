@@ -24,6 +24,14 @@ yarn-debug.log*
 yarn-error.log*
 *.log
 
+# Testing & Scratch
+.pytest_cache/
+.ruff_cache/
+scratch/
+e2e/test-results/
+e2e/playwright-report/
+load_tests/results*
+
 # IDE & OS
 .vscode/
 .idea/

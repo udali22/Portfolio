@@ -265,6 +265,25 @@ export default function App() {
       github_url: "https://github.com/udali22/Portfolio",
     },
     {
+      id: "apidesk",
+      title: "ApiDesk - Open-Design Desktop REST API Client",
+      tagline:
+        "Independent C#/.NET 10 & WPF desktop REST client with MVVM architecture.",
+      description:
+        "Clean-room desktop REST client built with .NET 10, WPF, and MVVM architecture, reverse-engineering the observable capabilities of Bruno. Features full HTTP method support (GET/POST/PUT/PATCH/DELETE), async execution with cancellation, dynamic {{variable}} interpolation across environments, JSON syntax coloring, layout/data persistence, and a 32-test automated suite (xUnit).",
+      category: "Desktop & Developer Tools",
+      technologies: [
+        "C#",
+        ".NET 10",
+        "WPF",
+        "MVVM",
+        "HttpClient",
+        "System.Text.Json",
+        "xUnit",
+      ],
+      github_url: "https://github.com/udali22/ApiDesk",
+    },
+    {
       id: "taskflow",
       title: "TaskFlow - Real-Time Collaborative Kanban Platform",
       tagline:
@@ -439,10 +458,11 @@ export default function App() {
     {
       category: "Frontend & Mobile",
       description:
-        "Modern component-driven web interfaces and cross-platform mobile apps",
+        "Modern component-driven web interfaces, desktop clients, and cross-platform apps",
       skills: [
         "React 19 / TypeScript",
         "Angular",
+        "WPF",
         "ASP.NET Core MVC",
         "Tailwind CSS",
         "Ionic",

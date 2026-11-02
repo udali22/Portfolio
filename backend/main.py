@@ -149,7 +149,7 @@ PORTFOLIO_PROFILE = ProfileData(
     email="maalimohamedalieng@gmail.com",
     phone="+216 95 088 782",
     github_url="https://github.com/udali22",
-    linkedin_url="https://www.linkedin.com/in/maali-mohamed-ali-478709218/",
+    linkedin_url="https://www.linkedin.com/in/mohamed-ali-maali-478709218/",
     status_badge="Open to Software Engineering & Backend Roles",
     highlights=[
         "Engineering Degree with Highest Honors (Mention Très Bien) from ISIMG Gabès.",

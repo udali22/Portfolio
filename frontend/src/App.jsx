@@ -153,7 +153,7 @@ export default function App() {
     email: "maalimohamedalieng@gmail.com",
     phone: "+216 95 088 782",
     github_url: "https://github.com/udali22",
-    linkedin_url: "https://www.linkedin.com/in/maali-mohamed-ali-478709218/",
+    linkedin_url: "https://www.linkedin.com/in/mohamed-ali-maali-478709218/",
     photo_url: "/profile.jpg",
     status_badge: "Seeking a Junior Backend / Software Engineering Role",
     highlights: [
@@ -677,7 +677,7 @@ export default function App() {
                 <a
                   href={
                     pData.linkedin_url ||
-                    "https://www.linkedin.com/in/maali-mohamed-ali-478709218/"
+                    "https://www.linkedin.com/in/mohamed-ali-maali-478709218/"
                   }
                   target="_blank"
                   rel="noreferrer"

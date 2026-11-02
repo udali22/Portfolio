@@ -269,6 +269,30 @@ PORTFOLIO_PROJECTS: List[Project] = [
         featured=True,
     ),
     Project(
+        id="apidesk",
+        title="ApiDesk - Open-Design Desktop REST API Client",
+        tagline="Independent C#/.NET 10 & WPF desktop REST client with MVVM architecture.",
+        description=(
+            "Clean-room desktop REST client built with .NET 10, WPF, and MVVM architecture, "
+            "reverse-engineering the observable capabilities of Bruno. Features full HTTP method support "
+            "(GET/POST/PUT/PATCH/DELETE), async execution with cancellation, dynamic {{variable}} interpolation "
+            "across environments, JSON syntax coloring, layout/data persistence, and a 32-test automated suite (xUnit)."
+        ),
+        category="Desktop & Developer Tools",
+        technologies=[
+            "C#",
+            ".NET 10",
+            "WPF",
+            "MVVM",
+            "HttpClient",
+            "System.Text.Json",
+            "xUnit",
+        ],
+        github_url="https://github.com/udali22/ApiDesk",
+        demo_url=None,
+        featured=True,
+    ),
+    Project(
         id="taskflow",
         title="TaskFlow - Real-time Collaborative Kanban Platform",
         tagline="Real-time collaborative Kanban platform built with .NET 8 and SignalR.",
@@ -484,10 +508,11 @@ PORTFOLIO_SKILLS: List[SkillGroup] = [
     ),
     SkillGroup(
         category="Frontend & Mobile",
-        description="Responsive web interfaces, state architecture, and mobile cross-platform",
+        description="Responsive web interfaces, desktop clients, and mobile cross-platform",
         skills=[
             "React 19 / TypeScript",
             "Angular",
+            "WPF",
             "ASP.NET Core MVC",
             "Tailwind CSS",
             "Ionic",

@@ -677,7 +677,7 @@ export default function App() {
                 <a
                   href={
                     pData.linkedin_url ||
-                    "https://www.linkedin.com/in/mohamed-ali-maali-478709218/"
+                    "https://www.linkedin.com/in/maali-mohamed-ali-478709218/"
                   }
                   target="_blank"
                   rel="noreferrer"
